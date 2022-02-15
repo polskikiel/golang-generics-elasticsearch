@@ -1,0 +1,13 @@
+module github.com/polskikiel/golang-generics-elasticsearch
+
+go 1.18
+
+require (
+	github.com/olivere/elastic/v7 v7.0.31
+	github.com/pkg/errors v0.9.1
+)
+
+require (
+	github.com/josharian/intern v1.0.0 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
+)
