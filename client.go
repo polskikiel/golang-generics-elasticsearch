@@ -9,12 +9,12 @@ import (
 
 type IndexName string
 
-func Index[T any](c *elastic.Client, id string, index IndexName, obj T) error {
+func Index[T any](c *elastic.Client, ctx context.Context, id string, index IndexName, obj T) error {
 	_, err := c.Index().
 		Index(string(index)).
 		Id(id).
 		BodyJson(obj).
-		Do(context.Background())
+		Do(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "while indexing %s:%s", index, id)
 	}
@@ -22,12 +22,12 @@ func Index[T any](c *elastic.Client, id string, index IndexName, obj T) error {
 	return nil
 }
 
-func Update[T any](c *elastic.Client, id string, indexName IndexName, obj T) error {
+func Update[T any](c *elastic.Client, ctx context.Context, id string, indexName IndexName, obj T) error {
 	_, err := c.Update().
 		Index(string(indexName)).
 		Id(id).
 		Doc(obj).
-		Do(context.Background())
+		Do(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "while updating %s:%s", indexName, id)
 	}
@@ -35,11 +35,11 @@ func Update[T any](c *elastic.Client, id string, indexName IndexName, obj T) err
 	return nil
 }
 
-func ListAll[T any](c *elastic.Client, indexName IndexName) ([]T, error) {
+func ListAll[T any](c *elastic.Client, ctx context.Context, indexName IndexName) ([]T, error) {
 	result := make([]T, 0)
 
 	resp, err := c.Search(string(indexName)).
-		Query(elastic.NewMatchAllQuery()).Do(context.Background())
+		Query(elastic.NewMatchAllQuery()).Do(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while listing %s", indexName)
 	}
@@ -55,11 +55,11 @@ func ListAll[T any](c *elastic.Client, indexName IndexName) ([]T, error) {
 	return result, nil
 }
 
-func Delete(c *elastic.Client, id string, indexName IndexName) error {
+func Delete(c *elastic.Client, ctx context.Context, id string, indexName IndexName) error {
 	_, err := c.Delete().
 		Index(string(indexName)).
 		Id(id).
-		Do(context.Background())
+		Do(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting index %s:%s", indexName, id)
 	}
@@ -67,13 +67,13 @@ func Delete(c *elastic.Client, id string, indexName IndexName) error {
 	return nil
 }
 
-func Drop(c *elastic.Client, indexNames ...IndexName) error {
+func Drop(c *elastic.Client, ctx context.Context, indexNames ...IndexName) error {
 	idxToDelete := make([]string, 0)
 	for _, name := range indexNames {
 		idxToDelete = append(idxToDelete, string(name))
 	}
 
-	_, err := c.DeleteIndex(idxToDelete...).Do(context.Background())
+	_, err := c.DeleteIndex(idxToDelete...).Do(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "while droping indexes: %v", idxToDelete)
 	}
